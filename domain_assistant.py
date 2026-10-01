@@ -23,7 +23,7 @@ from typing import Any, Protocol
 from dotenv import load_dotenv
 from openai import OpenAI, OpenAIError
 
-load_dotenv(Path(__file__).resolve().with_name(".env"))
+load_dotenv(Path(__file__).resolve().with_name(".env"), override=True)
 
 TOKEN_RE = re.compile(r"[a-z0-9]+")
 HEADING_RE = re.compile(r"^\s{0,3}#{1,6}\s+")
@@ -250,7 +250,8 @@ class OpenAIGenerator:
             raise RuntimeError("OPENAI_API_KEY is missing from .env")
         if not self.model:
             raise RuntimeError("OPENAI_MODEL is missing from .env")
-        self.client = OpenAI(api_key=api_key)
+        base_url = os.getenv("OPENAI_BASE_URL", "").strip() or None
+        self.client = OpenAI(api_key=api_key, base_url=base_url)
         self.max_output_tokens = max_output_tokens
 
     def generate(self, prompt: str) -> str:
